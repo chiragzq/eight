@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>Eight</title>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<canvas id="canvas" width="560" height="560" style="border: 1px solid black" /><br />
+        <button id="trainNet"> Train Net </button>
+        <p id="result"></p>
+        <script>
+            let ctx = document.getElementById("canvas").getContext("2d");
+            let mouseDown = false;
+            let grid = [];
+            for(let i = 0;i < 28;i ++) {
+                grid.push([]);
+                for(let j = 0;j < 28;j ++) {
+                    grid[i].push(false);
+                }
+            }
+    
+            function draw() {
+                for(let i = 1;i < 28;i ++) {
+                    ctx.fillRect(20 * i, 0, 1, 560);
+                    ctx.fillRect(0, 20 * i, 560, 1);
+                }
+    
+                for(let i = 0;i < 28;i ++) {
+                    for(let j = 0;j < 28;j ++) {
+                        if(grid[i][j]) {
+                            ctx.fillRect(20 * i, 20 * j, 20, 20);
+                        }
+                    }
+                }
+            }
+    
+            document.body.onmousedown = (e) => { 
+                mouseDown = true; 
+                let rect = document.getElementById("canvas").getBoundingClientRect();
+                let x = Math.trunc((e.clientX - rect.left) / 20);
+                let y = Math.trunc((e.clientY - rect.top) / 20);
+                if(x >= 0 && x < 28 && y >= 0 && y < 28) {
+                    grid[x][y] = true;
+                }
+            }
+            document.body.onmouseup = (e) => { mouseDown = false; }
+            document.body.onmousemove = (e) => {
+                if(mouseDown) {
+                    let rect = document.getElementById("canvas").getBoundingClientRect();
+                    let x = Math.trunc((e.clientX - rect.left) / 20);
+                    let y = Math.trunc((e.clientY - rect.top) / 20);
+                    if(x >= 0 && x < 28 && y >= 0 && y < 28) {
+                        grid[x][y] = true;
+                    }
+                }
+            }
+            setInterval(draw, 10);
+        </script>
+        <script>
+            $("#trainNet").click((e) => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/trainNet",
+                    type: "get",
+                    beforeSend: () => {
+                        $("#result").html("<b>Loading...</b>");
+                    },
+                    success: (data, status) => {
+                        $("#result").html(data);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
