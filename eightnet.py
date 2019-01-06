@@ -3,6 +3,7 @@ import tensorflow as tf
 import tensorflow.keras as keras
 import struct
 import threading
+import cv2
 
 class TrainingProgressHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs):
@@ -35,7 +36,7 @@ class EightNet:
     history = TrainingProgressHistory()
     thread = None
     
-    def load_data(num_images, labelPath="train-labels-idx1-ubyte", imagePath="train-images-idx3-ubyte"):
+    def load_data(num_images, labelPath="train-labels-idx1-ubyte", imagePath="train-images-idx3-ubyte", testImagePath="t10k-images-idx3-ubyte", testLabelPath="t10k-labels-idx1-ubyte"):
         tempLabels = []
         tempImages = []
         with open(labelPath, "rb") as f:
@@ -57,7 +58,7 @@ class EightNet:
                     for k in range(0, num_columns):
                         tempImages[i][j].append(struct.unpack("B", f.read(1))[0])
                 if i % 25 == 24:
-                    print("read %d images\r" % (i + 1))
+                    print("read %d images\r" % (i + 1), end="\r")
         print("Loaded %d/%d images" % (min(num_images, num_items), num_items))
         for i in range(0, len(tempLabels)):
             arr = np.zeros(10)
@@ -65,6 +66,43 @@ class EightNet:
             tempLabels[i] = arr
         EightNet.labels = np.array(tempLabels)
         EightNet.images = np.array(tempImages) / 255.0
+        
+        tempLabels = []
+        tempImages = []
+        with open(testLabelPath, "rb") as f:
+            magic = struct.unpack('>i', f.read(4))[0]
+            num_items = struct.unpack(">i", f.read(4))[0]
+            for i in range(0, num_items):
+                tempLabels.append(struct.unpack("B", f.read(1))[0])
+        print("Loaded %d/%d testing labels" % (num_items, num_items))
+        with open(testImagePath, "rb") as f:
+            magic = struct.unpack('>i', f.read(4))[0]
+            num_items = struct.unpack('>i', f.read(4))[0]
+            num_rows = struct.unpack('>i', f.read(4))[0]
+            num_columns = struct.unpack('>i', f.read(4))[0]
+            for i in range(0, num_items):
+                tempImages.append([])
+                for j in range(0, num_rows):
+                    tempImages[i].append([])
+                    for k in range(0, num_columns):
+                        byte = f.read(1)
+                        tempImages[i][j].append(struct.unpack("B", byte)[0])
+                if i % 25 == 24:
+                    print("read %d testing images\r" % (i + 1), end="\r")
+
+        for i in range(0, len(tempLabels)):
+            arr = np.zeros(10)
+            arr[tempLabels[i]] = 1
+            tempLabels[i] = arr
+        
+        print(EightNet.labels[5])
+        #EightNet.print_array(EightNet.images[5])
+        #cv2.imshow("image", EightNet.images[5])
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+        EightNet.testLabels = np.array(tempLabels)
+        EightNet.testImages = np.array(tempImages) / 255.0
+        
         
     def initialize_model():
         with graph.as_default():
@@ -92,5 +130,18 @@ class EightNet:
         return (EightNet.history.epochs, EightNet.history.total_epochs)
 
     def test():
-        for label in EightNet.labels:
-            
+        correct = 0
+        for image, label in zip(EightNet.testImages, EightNet.testLabels):
+            number = EightNet.get_number([image])
+            if number == np.argmax(label):
+                correct += 1;
+        return "%d/%d" % (correct, len(EightNet.testImages))
+        
+    def print_array(arr):
+        print("[")
+        for a in arr:
+            print("[")
+            for b in a:
+                print("%d," % b, end="")
+            print("],")
+        print("]")

@@ -11,7 +11,7 @@
             <button id="clear">Clear</button>
         </div><br />
         <button id="trainNet"> Train Net </button>
-        <progress id="progress" value="0" max="100"></progress><span id="percentage">0%</span><br />
+        <progress id="progress" value="0" max="100"></progress><span id="percentage">0%</span><button id="test">Test Accuracy</button><br />
         <button id="predict">Get Number</button>
         <p id="result"></p>
         <script>
@@ -84,8 +84,8 @@
                 }
             }
 
-            document.body.onmousedown = (e) => { 
-                mouseDown = true; 
+            document.body.onmousedown = (e) => {
+                mouseDown = true;
                 drawSquare(e)
             }
 
@@ -151,6 +151,16 @@
                         $("#result").text(`The number is ${num}.`);
                     }
                 })
+            });
+            $("#test").click((e) => {
+              e.preventDefault();
+              $.ajax({
+                url: "/test",
+                type: "get",
+                success: (data) => {
+                  $("#result").text(`Accuracy: ${data}`);
+                }
+              })
             })
         </script>
     </body>

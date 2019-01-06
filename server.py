@@ -9,6 +9,7 @@ def start_server():
     router.add_route("/trainNet", "views:trainNet")
     router.add_route("/trainProgress", "views:getTrainingProgress")
     router.add_route("/predict/{image}", "views:predict")
+    router.add_route("/test", "views:test")
 
     application = router.as_wsgi
 

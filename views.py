@@ -23,3 +23,6 @@ def getTrainingProgress(request):
 
 def predict(request):
     return Response(str(EightNet.get_number([json.loads(request.urlvars["image"])])))
+    
+def test(request):
+    return Response(EightNet.test())
