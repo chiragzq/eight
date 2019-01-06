@@ -91,6 +91,6 @@ class EightNet:
     def get_training_progress():
         return (EightNet.history.epochs, EightNet.history.total_epochs)
 
-        
-        
-        
+    def test():
+        for label in EightNet.labels:
+            
