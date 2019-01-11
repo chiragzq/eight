@@ -3,7 +3,6 @@ import tensorflow as tf
 import tensorflow.keras as keras
 import struct
 import threading
-import cv2
 
 class TrainingProgressHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs):
@@ -95,7 +94,7 @@ class EightNet:
             arr[tempLabels[i]] = 1
             tempLabels[i] = arr
         
-        print(EightNet.labels[5])
+        EightNet.   print_array(EightNet.images[5])
         #EightNet.print_array(EightNet.images[5])
         #cv2.imshow("image", EightNet.images[5])
         #cv2.waitKey(0)
@@ -109,7 +108,7 @@ class EightNet:
             EightNet.model = keras.Sequential([
                 keras.layers.Flatten(input_shape=(28, 28)),
                 keras.layers.Dense(128, activation=tf.nn.relu),
-                keras.layers.Dense(10, activation=tf.nn.relu)
+                keras.layers.Dense(10, activation=tf.nn.softmax)
             ])
             EightNet.model.compile(optimizer=tf.keras.optimizers.SGD(EightNet.initialLearningRate), loss="mean_squared_error", metrics=["accuracy"])
     
@@ -138,10 +137,10 @@ class EightNet:
         return "%d/%d" % (correct, len(EightNet.testImages))
         
     def print_array(arr):
-        print("[")
+        print("[", end="")
         for a in arr:
-            print("[")
+            print("[", end="")
             for b in a:
-                print("%d," % b, end="")
-            print("],")
-        print("]")
+                print("%0.5f," % b, end="")
+            print("],", end="")
+        print("]", end="\n")

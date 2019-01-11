@@ -144,7 +144,7 @@
             $("#predict").click((e) => {
                 e.preventDefault();
                 $.ajax({
-                    url: "/predict/" + JSON.stringify(grid),
+                    url: "/predict/" + JSON.stringify(correctGrid(grid)),
                     type: "get",
                     success: (data) => {
                         let num = Number(data);
@@ -162,6 +162,18 @@
                 }
               })
             })
+            const correctGrid = (grid) => {
+              let ret = [];
+              for(let i = 0;i < 28;i ++) {
+                ret[i] = [];
+              }
+              for(let i = 0;i < 28;i ++) {
+                for(let j = 0;j < 28;j ++) {
+                  ret[j][i] = grid[i][j];
+                }
+              }
+              return ret;
+            }
         </script>
     </body>
 </html>
