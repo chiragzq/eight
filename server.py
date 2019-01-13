@@ -6,10 +6,15 @@ def start_server():
     router = Router()
 
     router.add_route("/", "views:index")
+    router.add_route("/index.html", "views:index")
     router.add_route("/trainNet", "views:trainNet")
     router.add_route("/trainProgress", "views:getTrainingProgress")
     router.add_route("/predict/{image}", "views:predict")
     router.add_route("/test", "views:test")
+    router.add_route("/save", "views:save")
+    router.add_route("/load", "views:load")
+    router.add_route("/models", "views:get_models")
+    router.add_route("/loadModel/{name}", "views:load_model")
 
     application = router.as_wsgi
 

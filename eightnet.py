@@ -3,6 +3,8 @@ import tensorflow as tf
 import tensorflow.keras as keras
 import struct
 import threading
+import datetime
+import os
 
 class TrainingProgressHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs):
@@ -34,6 +36,7 @@ class EightNet:
     model = None
     history = TrainingProgressHistory()
     thread = None
+    prev_acc = -1
     
     def load_data(num_images, labelPath="train-labels-idx1-ubyte", imagePath="train-images-idx3-ubyte", testImagePath="t10k-images-idx3-ubyte", testLabelPath="t10k-labels-idx1-ubyte"):
         tempLabels = []
@@ -93,9 +96,7 @@ class EightNet:
             arr = np.zeros(10)
             arr[tempLabels[i]] = 1
             tempLabels[i] = arr
-        
-        EightNet.   print_array(EightNet.images[5])
-        #EightNet.print_array(EightNet.images[5])
+                #EightNet.print_array(EightNet.images[5])
         #cv2.imshow("image", EightNet.images[5])
         #cv2.waitKey(0)
         #cv2.destroyAllWindows()
@@ -113,6 +114,7 @@ class EightNet:
             EightNet.model.compile(optimizer=tf.keras.optimizers.SGD(EightNet.initialLearningRate), loss="mean_squared_error", metrics=["accuracy"])
     
     def train_model(iterations):
+        EightNet.prev_acc = -1
         with graph.as_default():
             if EightNet.thread == None or not EightNet.thread.isAlive():
                 EightNet.history.set_total_epochs(iterations)
@@ -134,7 +136,23 @@ class EightNet:
             number = EightNet.get_number([image])
             if number == np.argmax(label):
                 correct += 1;
+        EightNet.prev_acc = correct
         return "%d/%d" % (correct, len(EightNet.testImages))
+        
+    def save_model():
+        timestamp = datetime.datetime.today().strftime("%Y-%m-%d-%H:%M")
+        if EightNet.prev_acc == -1:
+            EightNet.test()
+        acc = "%d-%d" % (EightNet.prev_acc, len(EightNet.testImages))
+        EightNet.model.save("models/%s_%s.h5" % (timestamp, acc))
+    
+    def load_model(name):
+        with graph.as_default():
+            EightNet.model = keras.models.load_model("models/" + name)
+
+        
+    def get_models():
+        return os.listdir("models")
         
     def print_array(arr):
         print("[", end="")

@@ -26,3 +26,19 @@ def predict(request):
     
 def test(request):
     return Response(EightNet.test())
+    
+def save(request):
+    EightNet.save_model();
+    with open("models/model.h5", "rb") as f:
+        data = f.read()
+        return Response(body=data, status=200, content_type="application/x-hdf")
+        
+def load(request):
+    return render("load.html")
+    
+def get_models(request):
+    return Response(",".join(EightNet.get_models()))
+    
+def load_model(request):
+    name = request.urlvars["name"]
+    EightNet.load_model(name)

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Load Models</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <h1>Load a model</h1>
+    <div id="models">
+      
+    </div>
+    <script>
+      const loadModel = (name) => {
+        $.ajax({
+          url: "loadModel/" + name,
+          type: "get"
+        });
+        location.href = "index.html";
+      }
+    
+      $.ajax({
+        url: "models",
+        type: "get",
+        success: (data) => {
+          arr = data.split(",");
+          str = "<ul>"
+          arr.forEach((name) => {
+            str += `<li><a onclick="loadModel('${name}')" href="#">${name}</a></li>`;
+          });
+          str += "</ul">
+          $("#models").html(str);
+        }
+      });
+    </script>
+  </body>
+</html>
