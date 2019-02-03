@@ -1,8 +1,9 @@
-from eightnet import EightNet
+from eightnet import eightNet
 import server
 
 NUM_IMAGES = 1000
 
-EightNet.load_data(NUM_IMAGES)
-EightNet.initialize_model()
+
+eightNet.load_data(NUM_IMAGES)
+eightNet.initialize_model()
 server.start_server()

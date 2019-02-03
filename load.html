@@ -23,6 +23,7 @@
         type: "get",
         success: (data) => {
           arr = data.split(",");
+          arr.sort();
           str = "<ul>"
           arr.forEach((name) => {
             str += `<li><a onclick="loadModel('${name}')" href="#">${name}</a></li>`;

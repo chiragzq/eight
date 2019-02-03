@@ -26,19 +26,20 @@ class TrainThread(threading.Thread):
         self.callback = callback
 
     def run(self):
-        EightNet.model.fit(EightNet.images, EightNet.labels, epochs=self.iterations, callbacks=[self.callback])
+        self.model.fit(self.images, self.labels, epochs=self.iterations, callbacks=[self.callback])
 """
 graph = tf.get_default_graph()
 class EightNet:
-    labels = None
-    images = None
-    initialLearningRate = 0.06
-    model = None
-    history = TrainingProgressHistory()
-    thread = None
-    prev_acc = -1
+    def __init__(self):
+        self.labels = None
+        self.images = None
+        self.initialLearningRate = 0.06
+        self.model = None
+        self.history = TrainingProgressHistory()
+        self.thread = None
+        self.prev_acc = -1
     
-    def load_data(num_images, labelPath="train-labels-idx1-ubyte", imagePath="train-images-idx3-ubyte", testImagePath="t10k-images-idx3-ubyte", testLabelPath="t10k-labels-idx1-ubyte"):
+    def load_data(self, num_images, labelPath="train-labels-idx1-ubyte", imagePath="train-images-idx3-ubyte", testImagePath="t10k-images-idx3-ubyte", testLabelPath="t10k-labels-idx1-ubyte"):
         tempLabels = []
         tempImages = []
         with open(labelPath, "rb") as f:
@@ -66,8 +67,8 @@ class EightNet:
             arr = np.zeros(10)
             arr[tempLabels[i]] = 1
             tempLabels[i] = arr
-        EightNet.labels = np.array(tempLabels)
-        EightNet.images = np.array(tempImages) / 255.0
+        self.labels = np.array(tempLabels)
+        self.images = np.array(tempImages) / 255.0
         
         tempLabels = []
         tempImages = []
@@ -96,65 +97,65 @@ class EightNet:
             arr = np.zeros(10)
             arr[tempLabels[i]] = 1
             tempLabels[i] = arr
-                #EightNet.print_array(EightNet.images[5])
-        #cv2.imshow("image", EightNet.images[5])
+                #self.print_array(self.images[5])
+        #cv2.imshow("image", self.images[5])
         #cv2.waitKey(0)
         #cv2.destroyAllWindows()
-        EightNet.testLabels = np.array(tempLabels)
-        EightNet.testImages = np.array(tempImages) / 255.0
+        self.testLabels = np.array(tempLabels)
+        self.testImages = np.array(tempImages) / 255.0
         
         
-    def initialize_model():
+    def initialize_model(self):
         with graph.as_default():
-            EightNet.model = keras.Sequential([
+            self.model = keras.Sequential([
                 keras.layers.Flatten(input_shape=(28, 28)),
                 keras.layers.Dense(128, activation=tf.nn.relu),
                 keras.layers.Dense(10, activation=tf.nn.softmax)
             ])
-            EightNet.model.compile(optimizer=tf.keras.optimizers.SGD(EightNet.initialLearningRate), loss="mean_squared_error", metrics=["accuracy"])
+            self.model.compile(optimizer=tf.keras.optimizers.SGD(self.initialLearningRate), loss="mean_squared_error", metrics=["accuracy"])
     
-    def train_model(iterations):
-        EightNet.prev_acc = -1
+    def train_model(self, iterations):
+        self.prev_acc = -1
         with graph.as_default():
-            if EightNet.thread == None or not EightNet.thread.isAlive():
-                EightNet.history.set_total_epochs(iterations)
-                #EightNet.thread = TrainThread(iterations, EightNet.model, EightNet.images, EightNet.labels, EightNet.history)
-                #EightNet.thread.start()
-                EightNet.model.fit(EightNet.images, EightNet.labels, epochs=iterations, callbacks=[EightNet.history])
+            if self.thread == None or not self.thread.isAlive():
+                self.history.set_total_epochs(iterations)
+                #self.thread = TrainThread(iterations, self.model, self.images, self.labels, self.history)
+                #self.thread.start()
+                self.model.fit(self.images, self.labels, epochs=iterations, callbacks=[self.history])
 
-    def get_number(image):
+    def get_number(self, image):
         with graph.as_default():
-            output = EightNet.model.predict(np.array(image))
+            output = self.model.predict(np.array(image))
             return np.argmax(output)
 
-    def get_training_progress():
-        return (EightNet.history.epochs, EightNet.history.total_epochs)
+    def get_training_progress(self):
+        return (self.history.epochs, self.history.total_epochs)
 
-    def test():
+    def test(self):
         correct = 0
-        for image, label in zip(EightNet.testImages, EightNet.testLabels):
-            number = EightNet.get_number([image])
+        for image, label in zip(self.testImages, self.testLabels):
+            number = self.get_number([image])
             if number == np.argmax(label):
                 correct += 1;
-        EightNet.prev_acc = correct
-        return "%d/%d" % (correct, len(EightNet.testImages))
+        self.prev_acc = correct
+        return "%d/%d" % (correct, len(self.testImages))
         
-    def save_model():
+    def save_model(self):
         timestamp = datetime.datetime.today().strftime("%Y-%m-%d-%H:%M")
-        if EightNet.prev_acc == -1:
-            EightNet.test()
-        acc = "%d-%d" % (EightNet.prev_acc, len(EightNet.testImages))
-        EightNet.model.save("models/%s_%s.h5" % (timestamp, acc))
+        if self.prev_acc == -1:
+            self.test()
+        acc = "%d-%d" % (self.prev_acc, len(self.testImages))
+        self.model.save("models/%s_%s.h5" % (timestamp, acc))
     
-    def load_model(name):
+    def load_model(self, name):
         with graph.as_default():
-            EightNet.model = keras.models.load_model("models/" + name)
+            self.model = keras.models.load_model("models/" + name)
 
         
-    def get_models():
+    def get_models(self):
         return os.listdir("models")
         
-    def print_array(arr):
+    def print_array(self, arr):
         print("[", end="")
         for a in arr:
             print("[", end="")
@@ -162,3 +163,5 @@ class EightNet:
                 print("%0.5f," % b, end="")
             print("],", end="")
         print("]", end="\n")
+        
+eightNet = EightNet()
